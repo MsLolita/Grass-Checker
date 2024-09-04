@@ -57,7 +57,6 @@ class AirdropAllocator:
     def save_to_csv(self, data, filename='airdrop_allocation.csv'):
         result_data = data.get('result', {}).get('data', {})
         if not result_data:
-            logger.warning("No data found to save.")
             return
 
         with open(filename, mode='w', newline='') as file:
