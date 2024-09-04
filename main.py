@@ -1,7 +1,5 @@
 import asyncio
-from enum import verify
 
-import httpx
 import json
 import csv
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
@@ -76,11 +74,9 @@ class AirdropAllocator:
         total_tokens = data.get('all', 0)
         all_tokens += total_tokens
 
-        # Build the string for epochs
         epoch_info = " | ".join(
             [f"{key.replace('_user', '').title()}: {value}" for key, value in data.items() if "epoch" in key])
 
-        # Check for the presence of `_sybil`
         if any('_sybil' in key for key in data):
             logger.warning(f"SYBIL | {masked_wallet} Tokens: {total_tokens} | {epoch_info}")
         else:
