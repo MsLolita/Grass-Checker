@@ -21,7 +21,7 @@ Cheapest [proxies and servers](https://teletype.in/@web3enjoyer/4a2G9NuHssy) whi
 
 ### Options 📧
 
-1. CREATE ACCOUNTS:
+1. Threads:
  - In `data/config.py` put `THREADS = 1`
 
 
