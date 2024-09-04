@@ -29,7 +29,7 @@ Cheapest [proxies and servers](https://teletype.in/@web3enjoyer/4a2G9NuHssy) whi
 
 1. Accounts Setup 🔒
 
-   Put in `data/wallets.txt` accounts in format email:password (cool_aster@gmail.com:my_password123)
+   Put in `data/wallets.txt` wallets 
    
    ![image](https://github.com/user-attachments/assets/14a92b51-039d-41c6-ad77-1dbfb414d89a)
 
