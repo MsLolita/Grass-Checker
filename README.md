@@ -7,14 +7,12 @@ Discover the latest `<crypto/>` moves in my Telegram Channel:
 
 Cheapest [proxies and servers](https://teletype.in/@web3enjoyer/4a2G9NuHssy) which fits for  on [grass.io](https://app.getgrass.io/register/?referralCode=erxggzon61FWrJ9).
 
-![image](https://github.com/MsLolita/grass/assets/58307006/610b95b4-369f-4a71-ac24-f45e8dee6380)
+![image](https://github.com/user-attachments/assets/dfbb86c1-a053-478c-8e95-a5f6ced7de5f)
 
 
 ### What is bot for?
    - Check Allocations Points
    - Detect Sybil Accounts
-
-> You can put as many proxies as u can, bot uses database and will load up proxies from extra ones
 
 
 ## Quick Start 📚

@@ -1,9 +1,13 @@
 import asyncio
+from enum import verify
+
 import httpx
 import json
 import csv
 from tenacity import retry, wait_exponential, stop_after_attempt, retry_if_exception_type
 from better_proxy import Proxy
+import aiohttp
+
 
 from data.config import THREADS
 from utils import logger
@@ -31,13 +35,15 @@ class AirdropAllocator:
         }
         self.semaphore = asyncio.Semaphore(max_concurrent_requests)
 
-    @retry(wait=wait_exponential(multiplier=1, min=4, max=10), stop=stop_after_attempt(5), retry=retry_if_exception_type(httpx.HTTPError))
+    @retry(wait=wait_exponential(multiplier=1, min=4, max=10), stop=stop_after_attempt(5),
+           retry=retry_if_exception_type(aiohttp.ClientError))
     async def fetch_airdrop_allocation(self):
         async with self.semaphore:
-            async with httpx.AsyncClient(proxy=self.proxy, verify=False) as client:
-                response = await client.get(f'{self.base_url}?input=%7B%22walletAddress%22:%22{self.wallet_address}%22%7D', headers=self.headers)
-                response.raise_for_status()
-                return response.json()
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+                async with session.get(f'{self.base_url}?input=%7B%22walletAddress%22:%22{self.wallet_address}%22%7D',
+                                       headers=self.headers, proxy=self.proxy, verify_ssl=False) as response:
+                    response.raise_for_status()
+                    return await response.json()
 
     def calculate_totals(self, data):
         points = data.get('result', {}).get('data', {})
