@@ -55,7 +55,7 @@ class AirdropAllocator:
         self.wallet_address = wallet_address
         self.masked_wallet = f"{self.wallet_address[:6]}...{self.wallet_address[-6:]}"
         self.proxy = proxy and Proxy.from_str(proxy).as_url
-        self.index = index  # Sequence number for the table
+        self.index = index
         self.base_url = 'https://api.getgrass.io/airdropAllocations'
         self.headers = {
             'accept': 'application/json, text/plain, */*',
@@ -127,20 +127,18 @@ class AirdropAllocator:
             totals = self.calculate_totals(data)
 
             if data.get('result', {}).get("data") is None:
-                # logger.warning(f"No data found for {self.masked_wallet}. CHANGE PROXY or INVALID or UNELIGIBLE")
                 await self.format_console_output({}, "Error")
                 return
 
             if any('_sybil' in key for key in totals):
                 status = "Sybil"
             else:
-                status = "Valid"
+                status = "Eligible"
 
             await self.format_console_output(totals, status)
             self.beautify_and_log(data, log_filename)
             self.save_to_csv(data)
         except Exception as e:
-            # logger.error(f"An error occurred for {self.wallet_address}: {e}")
             await self.format_console_output({}, "Error")
 
 async def read_file_lines(file_path):
