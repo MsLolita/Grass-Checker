@@ -113,7 +113,7 @@ class AirdropAllocator:
     async def format_console_output(self, data, status):
         global all_tokens
 
-        total_tokens = data.get('all', 0)
+        total_tokens = round(data.get('all', 0), 2)
         all_tokens += total_tokens
 
         if self.table_formatter:
