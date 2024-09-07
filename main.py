@@ -132,6 +132,7 @@ class AirdropAllocator:
 
             if any('_sybil' in key for key in totals):
                 status = "Sybil"
+                sybils.append(self.wallet_address)
             else:
                 status = "Eligible"
 
@@ -172,11 +173,15 @@ async def main():
 
     await asyncio.gather(*tasks)
 
+    with open("logs/sybils.txt", "w") as f:
+        f.write("\n".join(sybils))
+
     print("+-----+------------------+----------------+----------+")
     logger.success(f"Total tokens: {all_tokens}")
 
 if __name__ == '__main__':
     all_tokens = 0
+    sybils = []
     table_formatter = ConsoleTableFormatter()
 
     print("Starting Airdrop Allocator...")
