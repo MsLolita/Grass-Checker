@@ -7,6 +7,9 @@ from tenacity import retry, wait_exponential, stop_after_attempt
 from better_proxy import Proxy
 import aiohttp
 from tabulate import tabulate
+from fake_useragent import UserAgent
+
+
 from data.config import THREADS
 from utils import logger
 
@@ -51,7 +54,7 @@ class ConsoleTableFormatter:
 
 
 class AirdropAllocator:
-    def __init__(self, wallet_address: str, proxy: str = None, index: int = 0, max_concurrent_requests: int = 5):
+    def __init__(self, wallet_address: str, proxy: str = None, index: int = 0):
         self.wallet_address = wallet_address
         self.masked_wallet = f"{self.wallet_address[:6]}...{self.wallet_address[-6:]}"
         self.proxy = proxy and Proxy.from_str(proxy).as_url
@@ -69,23 +72,22 @@ class AirdropAllocator:
             'sec-fetch-dest': 'empty',
             'sec-fetch-mode': 'cors',
             'sec-fetch-site': 'cross-site',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
+            'user-agent': UserAgent().random,
         }
-        self.semaphore = asyncio.Semaphore(max_concurrent_requests)
+
         self.results_table = []
         self.table_formatter = table_formatter
 
     @retry(wait=wait_exponential(min=2, max=7), stop=stop_after_attempt(7))
     async def fetch_airdrop_allocation(self):
-        async with self.semaphore:
-            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
-                async with session.get(f'{self.base_url}?input=%7B%22walletAddress%22:%22{self.wallet_address}%22%7D',
-                                       headers=self.headers, proxy=self.proxy, verify_ssl=False) as response:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
+            async with session.get(f'{self.base_url}?input=%7B%22walletAddress%22:%22{self.wallet_address}%22%7D',
+                                   headers=self.headers, proxy=self.proxy, verify_ssl=False) as response:
 
-                    data = await response.json()
-                    assert data.get('result')
+                data = await response.json()
+                assert data.get('result')
 
-                    return data
+                return data
 
     def calculate_totals(self, data):
         points = data.get('result', {}).get('data', {})
@@ -122,25 +124,28 @@ class AirdropAllocator:
             print(f"{self.index} | {self.masked_wallet} | {total_tokens} | {status}")
 
     async def process_allocation(self, log_filename='airdrop_log.json'):
-        try:
-            data = await self.fetch_airdrop_allocation()
-            totals = self.calculate_totals(data)
+        async with semaphore:
+            try:
+                data = await self.fetch_airdrop_allocation()
+                totals = self.calculate_totals(data)
 
-            if data.get('result', {}).get("data") is None:
+                if data.get('result', {}).get("data") is None:
+                    await self.format_console_output({}, "Error")
+                    return
+
+                if any('_sybil' in key for key in totals):
+                    status = "Sybil"
+
+                    with open("logs/sybils.txt", "a") as f:
+                        f.write(f"{self.wallet_address}\n")
+                else:
+                    status = "Eligible"
+
+                await self.format_console_output(totals, status)
+                self.beautify_and_log(data, log_filename)
+                self.save_to_csv(data)
+            except Exception as e:
                 await self.format_console_output({}, "Error")
-                return
-
-            if any('_sybil' in key for key in totals):
-                status = "Sybil"
-                sybils.append(self.wallet_address)
-            else:
-                status = "Eligible"
-
-            await self.format_console_output(totals, status)
-            self.beautify_and_log(data, log_filename)
-            self.save_to_csv(data)
-        except Exception as e:
-            await self.format_console_output({}, "Error")
 
 async def read_file_lines(file_path):
     with open(file_path, 'r') as file:
@@ -161,27 +166,23 @@ async def main():
 
     proxies = await read_file_lines(f'{path}/proxies.txt')
 
-    max_concurrent_requests = THREADS
     tasks = []
 
     print("+-----+------------------+----------------+----------+")
 
     for i, wallet in enumerate(wallet_addresses):
         proxy = proxies[i % len(proxies)] if proxies else None
-        allocator = AirdropAllocator(wallet_address=wallet, proxy=proxy, index=i+1, max_concurrent_requests=max_concurrent_requests)
+        allocator = AirdropAllocator(wallet_address=wallet, proxy=proxy, index=i+1)
         tasks.append(asyncio.create_task(allocator.process_allocation()))
 
     await asyncio.gather(*tasks)
-
-    with open("logs/sybils.txt", "w") as f:
-        f.write("\n".join(sybils))
 
     print("+-----+------------------+----------------+----------+")
     logger.success(f"Total tokens: {all_tokens}")
 
 if __name__ == '__main__':
     all_tokens = 0
-    sybils = []
+    semaphore = asyncio.Semaphore(THREADS)
     table_formatter = ConsoleTableFormatter()
 
     print("Starting Airdrop Allocator...")
