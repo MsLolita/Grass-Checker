@@ -59,7 +59,7 @@ class AirdropAllocator:
         self.masked_wallet = f"{self.wallet_address[:6]}...{self.wallet_address[-6:]}"
         self.proxy = proxy and Proxy.from_str(proxy).as_url
         self.index = index
-        self.base_url = 'https://api.getgrass.io/airdropAllocations'
+        self.base_url = 'https://api.getgrass.io/airdropAllocationsV2'
         self.headers = {
             'accept': 'application/json, text/plain, */*',
             'accept-language': 'en-US,en;q=0.9',
