@@ -7,6 +7,7 @@ from data.config import THREADS
 from utils import logger
 from core.allocation_processor import AllocationProcessor
 
+
 class ConsoleTableFormatter:
     def __init__(self):
         self.headers = ["#", "Wallet Address", "Total Tokens", "Status"]
@@ -59,7 +60,7 @@ async def main():
             all_tokens += result
 
     print("\n")
-    logger.success(f"Total: {all_tokens} $GRASS / {all_tokens * 1.5} $")
+    logger.success(f"Total: {all_tokens:.2f} $GRASS / {(all_tokens * 1.5):.2f} $")
 
 
 if __name__ == '__main__':
