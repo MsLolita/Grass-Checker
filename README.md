@@ -6,6 +6,7 @@ Discover the latest `<crypto/>` moves in my Telegram Channel:
 [![My Channel 🥰](https://img.shields.io/badge/Web3_Enjoyer_|_Subscribe_🥰-0A66C2?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/web3_enjoyer_club) 
 
 Cheapest [proxies and servers](https://teletype.in/@web3enjoyer/4a2G9NuHssy) which fits for  on [grass.io](https://app.getgrass.io/register/?referralCode=erxggzon61FWrJ9).
+### Also can be useful: [Grass Farm Auto](https://github.com/MsLolita/grass) or [Grass Claimer](https://github.com/MsLolita/Grass-Claimer)
 
 ![image](https://github.com/user-attachments/assets/dfbb86c1-a053-478c-8e95-a5f6ced7de5f)
 
